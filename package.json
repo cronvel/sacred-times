@@ -1,0 +1,46 @@
+{
+  "name": "sacred-times",
+  "version": "0.0.0",
+  "description": "Sacred calendar",
+  "main": "lib/SacredTimes.js",
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "bin": {
+    "sacred-times": "./bin/sacred-times"
+  },
+  "dependencies": {
+    "dom-kit": "^0.3.10",
+    "lune": "^0.4.0",
+    "moment": "^2.22.2",
+    "seasons-dates": "0.0.1",
+    "suncalc": "^1.8.0",
+    "utterminal": "^0.5.12"
+  },
+  "scripts": {
+    "test": "tea-time -R dot -O"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cronvel/sacred-times.git"
+  },
+  "keywords": [
+    "sacred",
+    "calendar"
+  ],
+  "author": "Cédric Ronvel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cronvel/sacred-times/issues"
+  },
+  "copyright": {
+    "title": "Sacred Times",
+    "years": [
+      2018
+    ],
+    "owner": "Cédric Ronvel"
+  }
+}
