@@ -51,10 +51,12 @@ domKit.ready( () => {
 	page.$events = document.querySelector( 'events' ) ;
 	page.$planet = document.querySelector( 'planet' ) ;
 
-	page.$solarModeButton = document.querySelector( 'item.solar' ) ;
-	page.$solarModeButton.addEventListener( 'click' , switchToSolarMode ) ;
 	page.$legalModeButton = document.querySelector( 'item.legal' ) ;
 	page.$legalModeButton.addEventListener( 'click' , switchToLegalMode ) ;
+	page.$solarModeButton = document.querySelector( 'item.solar' ) ;
+	page.$solarModeButton.addEventListener( 'click' , switchToSolarMode ) ;
+	page.$lunisolarModeButton = document.querySelector( 'item.lunisolar' ) ;
+	page.$lunisolarModeButton.addEventListener( 'click' , switchToLuniSolarMode ) ;
 	
 	page.moon = new SvgPhase( {
 		container: page.$planet ,
@@ -122,8 +124,9 @@ function fullRefresh() {
 
 
 function getModeDateTime( sacredTimes ) {
-	if ( config.mode === 'solar' ) { return sacredTimes.getSolarDateTime() ; }
 	if ( config.mode === 'legal' ) { return sacredTimes.getLegalDateTime() ; }
+	if ( config.mode === 'solar' ) { return sacredTimes.getSolarDateTime() ; }
+	if ( config.mode === 'lunisolar' ) { return sacredTimes.getLuniSolarDateTime() ; }
 }
 
 
@@ -142,18 +145,11 @@ function populateEvents( events ) {
 
 function switchToMode( mode ) {
 	switch ( mode ) {
-		case 'solar': return switchToSolarMode() ;
 		case 'legal': return switchToLegalMode() ;
+		case 'solar': return switchToSolarMode() ;
+		case 'lunisolar': return switchToLuniSolarMode() ;
 		default: return switchToLegalMode() ;
 	}
-}
-
-function switchToSolarMode() {
-	config.mode = 'solar' ;
-	turnOffButtons() ;
-	page.$solarModeButton.classList.add( 'active' ) ;
-	fullRefresh() ;
-	saveConfig() ;
 }
 
 function switchToLegalMode() {
@@ -164,9 +160,26 @@ function switchToLegalMode() {
 	saveConfig() ;
 }
 
+function switchToSolarMode() {
+	config.mode = 'solar' ;
+	turnOffButtons() ;
+	page.$solarModeButton.classList.add( 'active' ) ;
+	fullRefresh() ;
+	saveConfig() ;
+}
+
+function switchToLuniSolarMode() {
+	config.mode = 'lunisolar' ;
+	turnOffButtons() ;
+	page.$lunisolarModeButton.classList.add( 'active' ) ;
+	fullRefresh() ;
+	saveConfig() ;
+}
+
 function turnOffButtons() {
-	page.$solarModeButton.classList.remove( 'active' ) ;
 	page.$legalModeButton.classList.remove( 'active' ) ;
+	page.$solarModeButton.classList.remove( 'active' ) ;
+	page.$lunisolarModeButton.classList.remove( 'active' ) ;
 }
 
 

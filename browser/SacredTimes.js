@@ -246,16 +246,16 @@ SacredTimes.prototype.stYearCelebrationDays = function( utcYear ) {
 		The spring equinox is celebrated in the morning, at noon and in the afternoon.
 	*/
 	sunData = this.utcLocalSun( stDateTimes.springEquinox.toDate() ) ;
-	celebrationDays.springEquinox = moment( stDateTimes.springEquinox ).hour( 10 )
+	celebrationDays.ostara = moment( stDateTimes.springEquinox ).hour( 10 )
 		.minute( 0 )
 		.second( 0 )
 		.millisecond( 0 ) ;
 	delta = moment.duration( stDateTimes.springEquinox.diff( sunData.sunset ) ) ;
 
-	console.log( "Spring equinox comput:" , stDateTimes.springEquinox , sunData.sunset , delta.toISOString() ) ;
+	console.log( "Ostara comput:" , stDateTimes.springEquinox , sunData.sunset , delta.toISOString() ) ;
 
 	if ( delta > 0 ) {
-		celebrationDays.springEquinox.add( 1 , "day" ) ;
+		celebrationDays.ostara.add( 1 , "day" ) ;
 	}
 
 	/*
@@ -280,7 +280,7 @@ SacredTimes.prototype.stYearCelebrationDays = function( utcYear ) {
 		The summer solstice is celebrated at noon, in the afternoon, and in the evening.
 	*/
 	sunData = this.utcLocalSun( stDateTimes.summerSolstice.toDate() ) ;
-	celebrationDays.summerSolstice = moment( stDateTimes.summerSolstice ).hour( 12 )
+	celebrationDays.litha = moment( stDateTimes.summerSolstice ).hour( 12 )
 		.minute( 0 )
 		.second( 0 )
 		.millisecond( 0 ) ;
@@ -289,7 +289,7 @@ SacredTimes.prototype.stYearCelebrationDays = function( utcYear ) {
 	console.log( "Summer solstice comput:" , stDateTimes.summerSolstice , sunData.sunset , delta.toISOString() ) ;
 
 	if ( delta > 0 ) {
-		celebrationDays.summerSolstice.add( 1 , "day" ) ;
+		celebrationDays.litha.add( 1 , "day" ) ;
 	}
 
 	/*
@@ -314,7 +314,7 @@ SacredTimes.prototype.stYearCelebrationDays = function( utcYear ) {
 		The autumn equinox is celebrated the morning until noon.
 	*/
 	sunData = this.utcLocalSun( stDateTimes.autumnEquinox.toDate() ) ;
-	celebrationDays.autumnEquinox = moment( stDateTimes.autumnEquinox ).hour( 16 )
+	celebrationDays.mabon = moment( stDateTimes.autumnEquinox ).hour( 16 )
 		.minute( 0 )
 		.second( 0 )
 		.millisecond( 0 ) ;
@@ -323,7 +323,7 @@ SacredTimes.prototype.stYearCelebrationDays = function( utcYear ) {
 	console.log( "Autumn equinox comput:" , stDateTimes.autumnEquinox , sunData.sunset , delta.toISOString() ) ;
 
 	if ( delta > 0 ) {
-		celebrationDays.autumnEquinox.add( 1 , "day" ) ;
+		celebrationDays.mabon.add( 1 , "day" ) ;
 	}
 
 	/*
@@ -352,7 +352,7 @@ SacredTimes.prototype.stYearCelebrationDays = function( utcYear ) {
 		This is the sole celebration that can happened before its Sacred Time.
 	*/
 	sunData = this.utcLocalSun( stDateTimes.winterSolstice.toDate() ) ;
-	celebrationDays.winterSolstice = moment( stDateTimes.winterSolstice ).hour( 18 )
+	celebrationDays.yule = moment( stDateTimes.winterSolstice ).hour( 18 )
 		.minute( 0 )
 		.second( 0 )
 		.millisecond( 0 ) ;
@@ -361,7 +361,7 @@ SacredTimes.prototype.stYearCelebrationDays = function( utcYear ) {
 	console.log( "Winter solstice comput:" , stDateTimes.winterSolstice , sunData.sunrise , delta.toISOString() ) ;
 
 	if ( delta < 0 ) {
-		celebrationDays.winterSolstice.subtract( 1 , "day" ) ;
+		celebrationDays.yule.subtract( 1 , "day" ) ;
 	}
 
 	return celebrationDays ;
