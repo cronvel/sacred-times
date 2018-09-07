@@ -93,7 +93,119 @@ Event.merge = function( ... eventLists ) {
 } ;
 
 
-},{"moment":6}],2:[function(require,module,exports){
+},{"moment":7}],2:[function(require,module,exports){
+/*
+	Sacred Times
+
+	Copyright (c) 2018 Cédric Ronvel
+
+	The MIT License (MIT)
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+*/
+
+"use strict" ;
+
+
+
+function PseudoDate( data ) {
+	this.date = data.date ;
+	
+	this.year = data.year ;
+	this.month = data.month ,
+	this.day = data.day ;
+	this.hour = data.hour ;
+	this.minute = data.minute ;
+	this.second = data.second ;
+	
+	this.dayMood = data.dayMood ;
+
+	this._locale = 'en' ;
+}
+
+module.exports = PseudoDate ;
+
+
+
+PseudoDate.prototype.locale = function( locale ) {
+	this.locale = locale ;
+	return this ;
+} ;
+
+
+
+// Lunar month name
+const moonth = [
+	'Prima' , // 1
+	'Dana' ,
+	'Tyria' ,	// 3
+	'Cardina' , // 4
+	'' , // 5
+	'' , // 6
+	'Septima' , // 7
+	'Octavia' , // 8
+	'Nova' , // 9
+	'Decalia' , // 10
+	'' , // 11
+	'' , // 12
+	'Cosmo'	// 13
+] ;
+
+
+
+PseudoDate.prototype.format = function( format ) {
+	var parts = [] ;
+
+	if ( format.match( /L|M/ ) ) {
+		parts.push(
+			this.day + ( this.day === 1 ? 'er' : 'ème' ) +
+			' jour de la ' +
+			this.month + ( this.month === 1 ? 'ère' : 'ème' ) +
+			' lune'
+		) ;
+	}
+	
+	if ( format.match( /LLL|H/ ) ) {
+		parts.push(
+			( parts.length ? 'à ' : '' ) +
+			this.hour + '°' +
+			( this.minute < 10 ? '0' : '' ) + this.minute
+		) ;
+	}
+
+	return parts.join( ' ' ) ;
+} ;
+
+
+
+PseudoDate.prototype.valueOf = function() {
+	return this.date.valueOf() ;
+} ;
+
+
+
+PseudoDate.prototype.toString = function() {
+	return this.format( 'LLL' ) ;
+} ;
+
+
+},{}],3:[function(require,module,exports){
 /*
 	Sacred Times
 
@@ -129,6 +241,7 @@ const lune = require( 'lune' ) ;
 const SunCalc = require( 'suncalc' ) ;	// This module is used for many calculation, like sunrise and sunset
 const moment = require( 'moment' ) ;
 const Event = require( './Event.js' ) ;
+const PseudoDate = require( './PseudoDate.js' ) ;
 
 
 
@@ -176,7 +289,7 @@ SacredTimes.prototype.getSolarDateTime = function() { return this.solarDateTime 
 SacredTimes.prototype.computeLuniSolarNewYear = function( dateTime ) {
 	if ( ! dateTime ) { dateTime = this.universalDateTime ; }
 
-	var winterSolstice , moons , sunData , delta ;
+	var winterSolstice , moons , delta ;
 
 	winterSolstice = ( new Seasons( dateTime.year() - 1 ) ).winter ;
 	moons = lune.phase_range( winterSolstice , dateTime.toDate() , lune.PHASE_NEW ) ;
@@ -430,7 +543,7 @@ SacredTimes.prototype.getLuniSolarDateTime = function( dateTime ) {
 	
 	var year , moons , lunarMonth , newMoon , newLunarMonthDateTime ,
 		lunarMonthDay , newDayDateTime , dayMs , hour , minute , second ,
-		pseudoDateTime ;
+		dayMood , sunData , altSunData , pseudoDateTime ;
 	
 	year = this.luniSolarNewYear.year() ;
 	
@@ -475,39 +588,39 @@ SacredTimes.prototype.getLuniSolarDateTime = function( dateTime ) {
 	// 100-second system
 	second = Math.floor( dayMs / 1000 ) % 100 ;
 	console.log( "100-second" , second ) ;
-
-	pseudoDateTime = {
-		format: luniSolarFormat ,
-		locale: luniSolarLocale ,
+	
+	
+	// Day mood
+	sunData = this.utcLocalSun( this.solarDateTime.toDate() ) ;
+	
+	if ( this.solarDateTime < sunData.sunrise ) {
+		altSunData = this.utcLocalSun( moment( this.solarDateTime ).subtract( 1 , "day" ).toDate() ) ;
+		dayMood = - Math.floor( 1 + 12 * ( ( this.solarDateTime - altSunData.sunset ) / ( sunData.sunrise - altSunData.sunset ) ) ) ;
+		console.log( 'day mood' , dayMood ) ;
+	}
+	else if ( this.solarDateTime >= sunData.sunrise && this.solarDateTime <= sunData.sunset ) {
+		dayMood = Math.floor( 1 + 12 * ( ( this.solarDateTime - sunData.sunrise ) / ( sunData.sunset - sunData.sunrise ) ) ) ;
+		console.log( 'day mood' , dayMood ) ;
+	}
+	else {
+		altSunData = this.utcLocalSun( moment( this.solarDateTime ).add( 1 , "day" ).toDate() ) ;
+		dayMood = Math.floor( 1 + 12 * ( ( this.solarDateTime - sunData.sunset ) / ( altSunData.sunrise - sunData.sunset ) ) ) ;
+		console.log( 'day mood' , dayMood ) ;
+	}
+	
+	pseudoDateTime = new PseudoDate( {
+		date: this.solarDateTime ,
 		year ,
 		month: lunarMonth ,
 		day: lunarMonthDay ,
-		hour , minute , second
-	} ;
+		hour , minute , second ,
+		dayMood
+	} ) ;
 	
 	console.log( "pseudo dateTime" , pseudoDateTime ) ;
 	
 	return pseudoDateTime ;
 } ;
-
-
-
-function luniSolarLocale() { return this ; }
-
-function luniSolarFormat( format ) {
-	var str = '' ;
-	
-	if ( format.match( /L|M/ ) ) {
-		str += this.day + 'ème jour de la ' + this.month + 'ème lune' ;
-	}
-	
-	if ( format.match( /H/ ) ) {
-		if ( str ) { str += ' ' ; }
-		str += this.hour + ':' + this.minute ;
-	}
-	
-	return str ;
-}
 
 
 
@@ -629,6 +742,8 @@ SacredTimes.prototype.toMode = function( dateTimes , mode = 'legal' ) {
 		case 'utc' : return this.toUtc( dateTimes ) ;
 		case 'legal' : return this.toLegal( dateTimes ) ;
 		case 'solar' : return this.toSolar( dateTimes ) ;
+		case 'luniSolar' :
+		case 'lunisolar' : return this.toLuniSolar( dateTimes ) ;
 		default : return this.toLegal( dateTimes ) ;
 	}
 } ;
@@ -681,6 +796,21 @@ SacredTimes.prototype.toSolar = function( dateTimes ) {
 
 
 
+// Map an object of UTC dates+times to an object of Solar dates+times
+SacredTimes.prototype.toLuniSolar = function( dateTimes ) {
+	if ( ( dateTimes instanceof moment ) || ( dateTimes instanceof Date ) ) {
+		return ( new SacredTimes( dateTimes ) ).getLuniSolarDateTime() ;
+	}
+
+	var pseudoDateTimes = {} ;
+
+	Object.keys( dateTimes ).forEach( name => pseudoDateTimes[ name ] = ( new SacredTimes( dateTimes[ name ] ) ).getLuniSolarDateTime() ) ;
+
+	return pseudoDateTimes ;
+} ;
+
+
+
 // /!\ Unlike other method, it only support one dateTime, not an object of dateTime
 SacredTimes.prototype.toNextRisingSun = function( dateTime ) {
 	var sunData = this.utcLocalSun( dateTime.toDate() ) ;
@@ -708,7 +838,7 @@ SacredTimes.prototype.durationToUtcOffset = function( duration ) {
 } ;
 
 
-},{"./Event.js":1,"lune":4,"moment":6,"moment/locale/fr":5,"seasons-dates":7,"suncalc":8}],3:[function(require,module,exports){
+},{"./Event.js":1,"./PseudoDate.js":2,"lune":5,"moment":7,"moment/locale/fr":6,"seasons-dates":8,"suncalc":9}],4:[function(require,module,exports){
 'use strict'
 
 function fromDate (date) {
@@ -722,7 +852,7 @@ function toDate (julian) {
 exports.fromDate = fromDate
 exports.toDate = toDate
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /**
  * This library calculates the current phase of the moon
  * as well as finds the dates of the recent moon phases.
@@ -1089,7 +1219,7 @@ exports.phase = phase
 exports.phase_hunt = phase_hunt
 exports.phase_range = phase_range
 
-},{"./julian":3}],5:[function(require,module,exports){
+},{"./julian":4}],6:[function(require,module,exports){
 //! moment.js locale configuration
 
 ;(function (global, factory) {
@@ -1173,7 +1303,7 @@ exports.phase_range = phase_range
 
 })));
 
-},{"../moment":6}],6:[function(require,module,exports){
+},{"../moment":7}],7:[function(require,module,exports){
 //! moment.js
 
 ;(function (global, factory) {
@@ -5681,7 +5811,7 @@ exports.phase_range = phase_range
 
 })));
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 function Seasons(year) {
     var k = Math.PI/180.0;
     var y = (year - 2000.0)/1000.0;
@@ -5802,7 +5932,7 @@ function Seasons(year) {
 
 module.exports = Seasons;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /*
  (c) 2011-2015, Vladimir Agafonkin
  SunCalc is a JavaScript library for calculating sun/moon position and light phases.
@@ -6114,5 +6244,5 @@ else window.SunCalc = SunCalc;
 
 }());
 
-},{}]},{},[2])(2)
+},{}]},{},[3])(3)
 });
