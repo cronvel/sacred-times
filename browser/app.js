@@ -105,7 +105,8 @@ function refresh() {
 function refreshMinutely( sacredTimes ) {
 	var dateTime = getModeDateTime( sacredTimes ) ;
 	
-	page.$tinyDate.textContent = SacredTimes.moment( dateTime ).locale( config.lang ).format( _( '_fullDateFormat' ) ) ;
+	//page.$tinyDate.textContent = SacredTimes.moment( dateTime ).locale( config.lang ).format( _( '_fullDateFormat' ) ) ;
+	page.$tinyDate.textContent = dateTime.locale( config.lang ).format( _( '_fullDateFormat' ) ) ;
 	
 	var moonPhase = sacredTimes.getMoonPhase() ;
 	//console.log( moonPhase ) ;
