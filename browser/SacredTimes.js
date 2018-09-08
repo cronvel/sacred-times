@@ -126,15 +126,19 @@ Event.merge = function( ... eventLists ) {
 
 function PseudoDate( data ) {
 	this.date = data.date ;
-	
+
 	this.year = data.year ;
 	this.month = data.month ,
 	this.day = data.day ;
 	this.hour = data.hour ;
 	this.minute = data.minute ;
 	this.second = data.second ;
-	
-	this.dayMood = data.dayMood ;
+
+	this.sunMoodHour = data.sunMoodHour ;
+	this.sunMoodMinute = data.sunMoodMinute ;
+
+	this.moonMoodHour = data.moonMoodHour ;
+	this.moonMoodMinute = data.moonMoodMinute ;
 
 	this._locale = 'en' ;
 }
@@ -151,45 +155,88 @@ PseudoDate.prototype.locale = function( locale ) {
 
 
 // Lunar month name
-const moonth = [
+const moonName = [
 	'Prima' , // 1
-	'Dana' ,
-	'Tyria' ,	// 3
+	'Diana' , // 2
+	'Tiara' , // 3
 	'Cardina' , // 4
-	'' , // 5
-	'' , // 6
+	'Quintella' , // 5
+	'Sixtina' , // 6
 	'Septima' , // 7
 	'Octavia' , // 8
 	'Nova' , // 9
 	'Decalia' , // 10
-	'' , // 11
-	'' , // 12
-	'Cosmo'	// 13
+	'Ondina' , // 11
+	'Dominica' , // 12
+	'Théresa' // 13
 ] ;
 
 
 
 PseudoDate.prototype.format = function( format ) {
-	var parts = [] ;
+	/*
+	format.replace( /L+/g , match => {
+		if ( match === 'L' ) {
+			if ( this.locale === 'fr' ) { return 'DD/MM/YYYY' ; }
+			return 'MM/DD/YYYY' ;
+		}
+		if ( match === 'LL' ) {
+			if ( this.locale === 'fr' ) { return 'D MMM YYYY' ; }
+			return 'MMM D, YYYY' ;
+		}
+	} ) ;
+	*/
 
-	if ( format.match( /L|M/ ) ) {
-		parts.push(
-			this.day + ( this.day === 1 ? 'er' : 'ème' ) +
-			' jour de la ' +
-			this.month + ( this.month === 1 ? 'ère' : 'ème' ) +
-			' lune'
-		) ;
-	}
-	
-	if ( format.match( /LLL|H/ ) ) {
-		parts.push(
-			( parts.length ? 'à ' : '' ) +
-			this.hour + '°' +
-			( this.minute < 10 ? '0' : '' ) + this.minute
-		) ;
-	}
+	return format
+		.replace( /(D+)( *)(M+)/g , ( match , day , spaces , month ) => {
+			return month + spaces + day ;
+		} )
+		.replace( /(H+ *):( *m+)/g , ( match , hour , minute ) => {
+			return hour + '°' + minute ;
+		} )
+		.replace( /\\.|([LlMQDdeEWwYgGAahHkmsSzZxX])\1*/g , match => {
+			if ( match[ 0 ] === '\\' ) { return match.slice( 1 ) ; }
 
-	return parts.join( ' ' ) ;
+			switch ( match ) {
+				case 'L' :
+				case 'LL' :
+				case 'l' :
+				case 'll' :
+					return moonName[ this.month - 1 ] + ' ' + this.day ;
+				case 'LLL' :
+				case 'LLLL' :
+				case 'lll' :
+				case 'llll' :
+					return moonName[ this.month - 1 ] + ' ' + this.day +
+						this.hour + '°' + ( this.minute < 10 ? '0' : '' ) + this.minute ;
+				case 'D' :
+					return this.day ;
+				case 'DD' :
+					return ( this.day < 10 ? '0' : '' ) + this.day ;
+				case 'M' :
+					return this.month ;
+				case 'MM' :
+					return ( this.month < 10 ? '0' : '' ) + this.month ;
+				case 'MMM' :
+				case 'MMMM' :
+					return moonName[ this.month - 1 ] ;
+				case 'H' :
+				case 'HH' :
+					return this.hour ;
+				case 'm' :
+				case 'mm' :
+					return this.minute ;
+				case 'd' :
+				case 'dd' :
+				case 'ddd' :
+				case 'dddd' :
+					return '' ;
+				default :
+					return '' ;
+					//return '(' + match + ')' ;
+			}
+		} )
+		.replace( /  +/g , ' ' ) ;
 } ;
 
 
@@ -540,47 +587,47 @@ SacredTimes.prototype.getLuniSolarDateTime = function( dateTime ) {
 	if ( dateTime ) {
 		return ( new SacredTimes( dateTime ) ).getLuniSolarDateTime() ;
 	}
-	
+
 	var year , moons , lunarMonth , newMoon , newLunarMonthDateTime ,
 		lunarMonthDay , newDayDateTime , dayMs , hour , minute , second ,
-		dayMood , sunData , altSunData , pseudoDateTime ;
-	
+		sunMoodHour , sunMoodMinute , sunData , altSunData , pseudoDateTime ;
+
 	year = this.luniSolarNewYear.year() ;
-	
+
 	moons = lune.phase_range( this.luniSolarNewYearMoon.toDate() , this.solarDateTime.toDate() , lune.PHASE_NEW ) ;
 	newMoon = this.toSolar( moment( moons[ moons.length - 1 ] ) ) ;
 	newLunarMonthDateTime = this.toNextRisingSun( newMoon ) ;
 	lunarMonth = moons.length ;
-	
+
 	if ( newLunarMonthDateTime > this.solarDateTime ) {
 		newMoon = this.toSolar( moment( moons[ moons.length - 2 ] ) ) ;
 		newLunarMonthDateTime = this.toNextRisingSun( newMoon ) ;
 		lunarMonth = moons.length - 1 ;
 	}
-	
+
 	lunarMonthDay = Math.floor( this.solarDateTime.diff( newLunarMonthDateTime ) / 86400000 ) + 1 ;
-	
+
 	newDayDateTime = moment( this.solarDateTime )
 		.hour( 4 )
 		.minute( 0 )
 		.second( 0 )
 		.millisecond( 0 ) ;
-	
+
 	if ( this.solarDateTime.hour() < 4 ) {
 		newDayDateTime.subtract( 1 , "day" ) ;
 	}
-	
+
 	//console.log( ">>>>>>" , lune.phase_range( this.luniSolarNewYearMoon.toDate() , this.solarDateTime.toDate() , lune.PHASE_NEW ) ) ;
 	console.log( "new lunar month dateTime" , newLunarMonthDateTime ) ;
 	console.log( "lunar month number" , lunarMonth ) ;
 	console.log( "lunar month day" , lunarMonthDay ) ;
-	
+
 	dayMs = this.solarDateTime.diff( newDayDateTime ) ;
-	
+
 	// 12-hours system
 	hour = Math.floor( dayMs / 7200000 ) + 1 ;
 	console.log( "12-hour" , hour ) ;
-	
+
 	// 72-minute system
 	minute = Math.floor( dayMs / 100000 ) % 72 ;
 	console.log( "72-minute" , minute ) ;
@@ -588,37 +635,42 @@ SacredTimes.prototype.getLuniSolarDateTime = function( dateTime ) {
 	// 100-second system
 	second = Math.floor( dayMs / 1000 ) % 100 ;
 	console.log( "100-second" , second ) ;
-	
-	
-	// Day mood
+
+
+	// Day sunMood
 	sunData = this.utcLocalSun( this.solarDateTime.toDate() ) ;
-	
+
 	if ( this.solarDateTime < sunData.sunrise ) {
-		altSunData = this.utcLocalSun( moment( this.solarDateTime ).subtract( 1 , "day" ).toDate() ) ;
-		dayMood = - Math.floor( 1 + 12 * ( ( this.solarDateTime - altSunData.sunset ) / ( sunData.sunrise - altSunData.sunset ) ) ) ;
-		console.log( 'day mood' , dayMood ) ;
+		altSunData = this.utcLocalSun( moment( this.solarDateTime ).subtract( 1 , "day" )
+			.toDate() ) ;
+		sunMoodHour = -Math.floor( 1 + 12 * ( ( this.solarDateTime - altSunData.sunset ) / ( sunData.sunrise - altSunData.sunset ) ) ) ;
+		console.log( 'day sunMood' , sunMoodHour ) ;
 	}
 	else if ( this.solarDateTime >= sunData.sunrise && this.solarDateTime <= sunData.sunset ) {
-		dayMood = Math.floor( 1 + 12 * ( ( this.solarDateTime - sunData.sunrise ) / ( sunData.sunset - sunData.sunrise ) ) ) ;
-		console.log( 'day mood' , dayMood ) ;
+		sunMoodHour = Math.floor( 1 + 12 * ( ( this.solarDateTime - sunData.sunrise ) / ( sunData.sunset - sunData.sunrise ) ) ) ;
+		console.log( 'day sunMood' , sunMoodHour ) ;
 	}
 	else {
-		altSunData = this.utcLocalSun( moment( this.solarDateTime ).add( 1 , "day" ).toDate() ) ;
-		dayMood = Math.floor( 1 + 12 * ( ( this.solarDateTime - sunData.sunset ) / ( altSunData.sunrise - sunData.sunset ) ) ) ;
-		console.log( 'day mood' , dayMood ) ;
+		altSunData = this.utcLocalSun( moment( this.solarDateTime ).add( 1 , "day" )
+			.toDate() ) ;
+		sunMoodHour = Math.floor( 1 + 12 * ( ( this.solarDateTime - sunData.sunset ) / ( altSunData.sunrise - sunData.sunset ) ) ) ;
+		console.log( 'day sunMood' , sunMoodHour ) ;
 	}
-	
+
 	pseudoDateTime = new PseudoDate( {
 		date: this.solarDateTime ,
 		year ,
 		month: lunarMonth ,
 		day: lunarMonthDay ,
-		hour , minute , second ,
-		dayMood
+		hour ,
+		minute ,
+		second ,
+		sunMoodHour ,
+		sunMoodMinute
 	} ) ;
-	
+
 	console.log( "pseudo dateTime" , pseudoDateTime ) ;
-	
+
 	return pseudoDateTime ;
 } ;
 
