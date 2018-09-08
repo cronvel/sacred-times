@@ -1,6 +1,6 @@
 {
   "name": "sacred-times",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Sacred calendar",
   "main": "lib/SacredTimes.js",
   "engines": {
