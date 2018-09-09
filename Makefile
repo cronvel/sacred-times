@@ -2,6 +2,7 @@
 
 BROWSERIFY=browserify
 UGLIFY=uglifyjs
+BABEL=babel
 
 
 browser: browser/SacredTimes.js browser/SacredTimes.min.js browser/dom.min.js
@@ -14,4 +15,9 @@ browser/SacredTimes.min.js: browser/SacredTimes.js
 
 browser/dom.min.js: node_modules/dom-kit/browser/dom.min.js
 	cp node_modules/dom-kit/browser/dom.min.js browser/dom.min.js
+
+
+# TODO...
+legacy-browser: browser/*.js
+	${BABEL} browser --out-dir legacy-browser --presets=es2015
 
