@@ -19,5 +19,9 @@ browser/dom.min.js: node_modules/dom-kit/browser/dom.min.js
 
 # TODO...
 legacy-browser: browser/*.js
+	cp browser/app.html legacy-browser/
+	cp browser/app.css legacy-browser/
+	cp -rf browser/fonts legacy-browser/
+	cp -rf browser/images legacy-browser/
 	${BABEL} browser --out-dir legacy-browser --presets=es2015
 
