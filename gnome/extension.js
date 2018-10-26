@@ -6373,76 +6373,91 @@ else window.SunCalc = SunCalc;
 },{}]},{},[3])(3)
 });
 
-const St = imports.gi.St;
-const Main = imports.ui.main;
-const Tweener = imports.ui.tweener;
+/* global imports, SacredTimes */
 
-let text, button;
+"use strict" ;
 
-console = { log: () => null } ;
+const St = imports.gi.St ;
+const Main = imports.ui.main ;
+const Tweener = imports.ui.tweener ;
+const Mainloop = imports.mainloop ;
+
+// console does not exist, but there are still debuging stuff in the lib, so we replace it
+const console = { log: () => null } ;
+
+
+
+let dateTimeText , text , button , timer ;
 
 function _hideHello() {
-    Main.uiGroup.remove_actor(text);
-    text = null;
+	Main.uiGroup.remove_actor( text ) ;
+	text = null ;
 }
 
 function _showHello() {
-    if (!text) {
-        text = new St.Label({ style_class: 'helloworld-label', text: "Hello, world!" });
-        Main.uiGroup.add_actor(text);
-    }
+	if ( ! text ) {
+		text = new St.Label( { style_class: 'helloworld-label' , text: dateTimeText } ) ;
+		Main.uiGroup.add_actor( text ) ;
+	}
 
-    text.opacity = 255;
+	text.opacity = 255 ;
 
-    let monitor = Main.layoutManager.primaryMonitor;
+	let monitor = Main.layoutManager.primaryMonitor ;
 
-    text.set_position(monitor.x + Math.floor(monitor.width / 2 - text.width / 2),
-                      monitor.y + Math.floor(monitor.height / 2 - text.height / 2));
+	text.set_position(
+		monitor.x + Math.floor( monitor.width / 2 - text.width / 2 ) ,
+		monitor.y + Math.floor( monitor.height / 2 - text.height / 2 )
+	) ;
 
-    Tweener.addTween(text,
-                     { opacity: 0,
-                       time: 2,
-                       transition: 'easeOutQuad',
-                       onComplete: _hideHello });
+	Tweener.addTween( text , {
+		opacity: 0 ,
+		time: 3 ,
+		transition: 'easeOutQuad' ,
+		onComplete: _hideHello
+	} ) ;
 }
 
-function init_old() {
-    button = new St.Bin({ style_class: 'panel-button',
-                          reactive: true,
-                          can_focus: true,
-                          x_fill: true,
-                          y_fill: false,
-                          track_hover: true });
-    let icon = new St.Icon({ icon_name: 'system-run-symbolic',
-                             style_class: 'system-status-icon' });
+function _update() {
+	let sacredTimes = new SacredTimes() ;
+	let luniSolarDateTime = sacredTimes.getLuniSolarDateTime() ;
+	dateTimeText = ' ' + luniSolarDateTime.format( 'dddd D MMMM YYYY - HH:mm' ) + ' ' ;
+	let label = new St.Label( { text: dateTimeText } ) ;
 
-    button.set_child(icon);
-    button.connect('button-press-event', _showHello);
+	button.set_child( label ) ;
 }
 
 function init() {
-    var sacredTimes = new SacredTimes() ;
-    var luniSolarDateTime = sacredTimes.getLuniSolarDateTime() ;
-    var text = luniSolarDateTime.format( 'dddd D MMMM YYYY - HH:mm' ) ;
-    
-    button = new St.Bin({ style_class: 'panel-button',
-                          reactive: true,
-                          can_focus: true,
-                          x_fill: true,
-                          y_fill: false,
-                          track_hover: true });
-    let icon = new St.Icon({ icon_name: 'system-run-symbolic',
-                             style_class: 'system-status-icon' });
+	button = new St.Bin( {
+		style_class: 'panel-button' ,
+		reactive: true ,
+		can_focus: true ,
+		x_fill: true ,
+		y_fill: false ,
+		track_hover: true
+	} ) ;
 
-    let label = new St.Label({ text: text });
-    button.set_child(label);
-    button.connect('button-press-event', _showHello);
+	/*
+	let icon = new St.Icon( {
+		icon_name: 'system-run-symbolic' ,
+		style_class: 'system-status-icon'
+	} ) ;
+	*/
+
+	_update() ;
+
+	button.connect( 'button-press-event' , _showHello ) ;
 }
 
 function enable() {
-    Main.panel._rightBox.insert_child_at_index(button, 0);
+	Main.panel._centerBox.insert_child_at_index( button , 10 ) ;
+
+	timer = Mainloop.timeout_add( 1000 , () => {
+		_update() ;
+		return true ; // Repeat, like setInterval()
+	} , null ) ;
 }
 
 function disable() {
-    Main.panel._rightBox.remove_child(button);
+	Main.panel._centerBox.remove_child( button ) ;
+	Mainloop.source_remove( timer ) ;
 }
