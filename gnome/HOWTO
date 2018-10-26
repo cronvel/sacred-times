@@ -1,0 +1,34 @@
+
+From Stack Exchange:
+https://askubuntu.com/questions/259174/add-a-custom-text-to-gnome-panel
+
+Install Gnome tweak tool
+
+Create new extension:
+gnome-shell-extension-tool --create-extension
+
+Extension created in /home/username/.local/share/gnome-shell/extensions/mylabel@hostname
+
+Create the Hello World as below:
+
+```
+function init() {
+    button = new St.Bin({ style_class: 'panel-button',
+                          reactive: true,
+                          can_focus: true,
+                          x_fill: true,
+                          y_fill: false,
+                          track_hover: true });
+    let icon = new St.Icon({ icon_name: 'system-run-symbolic',
+                             style_class: 'system-status-icon' });
+
+    let label = new St.Label({ text: "Hello, world!" });
+    button.set_child(label);
+    button.connect('button-press-event', _showHello);
+}
+```
+
+Save, Restart Gnome-Shell using Alt+F2, enter r then Enter
+
+Launch Gnome Tweak Tool → Extensions → Enable My Label extension.
+
