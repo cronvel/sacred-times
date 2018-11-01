@@ -704,12 +704,20 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     moonData;
 
                 moonData = this.utcLocalMoon(dateTime);
-                events.push(new Event('moonrise', moonData.rise, moonData.rise >= dateTime, false));
-                events.push(new Event('moonset', moonData.set, moonData.set >= dateTime, false));
+                if (moonData.rise) {
+                    events.push(new Event('moonrise', moonData.rise, moonData.rise >= dateTime, false));
+                }
+                if (moonData.set) {
+                    events.push(new Event('moonset', moonData.set, moonData.set >= dateTime, false));
+                }
 
                 moonData = this.utcLocalMoon(moment(dateTime).add(1, "day"));
-                events.push(new Event('moonrise', moonData.rise, moonData.rise >= dateTime, false));
-                events.push(new Event('moonset', moonData.set, moonData.set >= dateTime, false));
+                if (moonData.rise) {
+                    events.push(new Event('moonrise', moonData.rise, moonData.rise >= dateTime, false));
+                }
+                if (moonData.set) {
+                    events.push(new Event('moonset', moonData.set, moonData.set >= dateTime, false));
+                }
 
                 events = Event.filter(events, moment(dateTime).subtract(2, "hour"));
                 if (events.length > 2) {
