@@ -43,10 +43,17 @@ function _showHello() {
 	} ) ;
 }
 
+
+
+const moonPhaseGlyphs = [ '🌑' , '🌒' , '🌓' , '🌔' , '🌕' , '🌖' , '🌗' , '🌘' ] ;
+
 function _update() {
 	let sacredTimes = new SacredTimes() ;
 	let luniSolarDateTime = sacredTimes.getLuniSolarDateTime() ;
-	dateTimeText = ' ' + luniSolarDateTime.format( 'dddd D MMMM YYYY - HH:mm' ) + ' ' ;
+	let moonPhase = sacredTimes.getMoonPhase().phase ;
+	let moonString = moonPhaseGlyphs[ Math.floor( 0.5 + moonPhase * 8 ) % 8 ] ;
+	
+	dateTimeText = ' ' + luniSolarDateTime.format( 'dddd D MMMM YYYY - HH:mm' ) + ' ' + moonString + ' ' ;
 	let label = new St.Label( { text: dateTimeText } ) ;
 
 	button.set_child( label ) ;
