@@ -18,6 +18,7 @@
     "moment": "^2.22.2",
     "seasons-dates": "0.0.1",
     "suncalc": "^1.8.0",
+    "terminal-kit": "^1.31.10",
     "utterminal": "^0.5.12"
   },
   "scripts": {
