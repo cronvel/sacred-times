@@ -326,7 +326,7 @@ function SacredTimes( dateTime , latitude = DEFAULT_LATITUDE , longitude = DEFAU
 
 	this.computeSolarDateTime() ;
 	this.computeLuniSolarNewYear() ;
-	console.log( "luniSolarNewYear" , this.luniSolarNewYear ) ;
+	console.log( "luniSolarNewYear" , this.luniSolarNewYear.toString() ) ;
 }
 
 module.exports = SacredTimes ;
@@ -644,7 +644,7 @@ SacredTimes.prototype.getLuniSolarDateTime = function( dateTime ) {
 	}
 
 	//console.log( ">>>>>>" , lune.phase_range( this.luniSolarNewYearMoon.toDate() , this.solarDateTime.toDate() , lune.PHASE_NEW ) ) ;
-	console.log( "new lunar month dateTime" , newLunarMonthDateTime ) ;
+	console.log( "new lunar month dateTime" , newLunarMonthDateTime.toString() ) ;
 	console.log( "lunar month number" , lunarMonth ) ;
 	console.log( "lunar month day" , lunarMonthDay ) ;
 
@@ -695,7 +695,7 @@ SacredTimes.prototype.getLuniSolarDateTime = function( dateTime ) {
 		sunMoodMinute
 	} ) ;
 
-	console.log( "pseudo dateTime" , pseudoDateTime ) ;
+	console.log( "pseudo dateTime" , pseudoDateTime.toString() ) ;
 
 	return pseudoDateTime ;
 } ;
